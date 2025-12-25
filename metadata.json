@@ -1,0 +1,8 @@
+
+{
+  "name": "『TW』Vũ•RuBi",
+  "description": "Biến âm nhạc và hình ảnh của bạn thành những video điện ảnh do AI tạo ra bằng Gemini và Veo 3.1.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
