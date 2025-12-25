@@ -6,31 +6,36 @@ import { fileToBase64, downloadVideo } from './utils/helpers';
 import { analyzeMedia, generateVideoWithVeo } from './services/geminiService';
 
 declare global {
+  // Use interface AIStudio to avoid conflicting with existing declarations and satisfy the compiler.
+  interface AIStudio {
+    hasSelectedApiKey: () => Promise<boolean>;
+    openSelectKey: () => Promise<void>;
+  }
+
   interface Window {
-    // Fixed: All declarations of 'aistudio' must have identical modifiers.
-    // Making it readonly to align with expected environmental global declarations.
-    readonly aistudio: {
-      hasSelectedApiKey: () => Promise<boolean>;
-      openSelectKey: () => Promise<void>;
-    };
+    // Removed readonly and matched the expected AIStudio type to avoid redeclaration conflicts.
+    aistudio: AIStudio;
   }
 }
 
-// Overlay Effects Component based on selection
+// Enhanced Overlay Effects Component
 const EffectOverlay: React.FC<{ effectId: string }> = ({ effectId }) => {
   const items = useMemo(() => {
-    const count = 30;
+    const count = 25;
     return Array.from({ length: count }).map((_, i) => ({
       id: i,
       left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
       delay: `${Math.random() * 15}s`,
       duration: `${Math.random() * 10 + 5}s`,
       size: `${Math.random() * 1.5 + 0.5}rem`,
-      opacity: Math.random() * 0.5 + 0.2
+      opacity: Math.random() * 0.5 + 0.1
     }));
   }, [effectId]);
 
-  if (effectId === 'snow' || effectId === 'chill_blur') {
+  const category = EFFECTS.find(e => e.id === effectId)?.category;
+
+  if (category === 'winter') {
     return (
       <div className="fixed inset-0 pointer-events-none z-0">
         {items.map(item => (
@@ -50,11 +55,71 @@ const EffectOverlay: React.FC<{ effectId: string }> = ({ effectId }) => {
     );
   }
 
-  if (effectId === 'star_sparkle' || effectId === 'galaxy') {
+  if (effectId === 'bubble') {
     return (
       <div className="fixed inset-0 pointer-events-none z-0">
         {items.map(item => (
-          <div key={item.id} className="glow-particle" style={{ left: item.left, top: `${Math.random() * 100}%`, width: '4px', height: '4px', animationDuration: item.duration, animationDelay: item.delay, opacity: item.opacity }}></div>
+          <div key={item.id} className="bubble-item" style={{ 
+            left: item.left, 
+            width: item.size, 
+            height: item.size, 
+            animationDuration: item.duration, 
+            animationDelay: item.delay, 
+            opacity: item.opacity 
+          }}></div>
+        ))}
+      </div>
+    );
+  }
+
+  if (category === 'space') {
+    return (
+      <div className="fixed inset-0 pointer-events-none z-0">
+        {items.map(item => (
+          <div key={item.id} className="glow-particle" style={{ 
+            left: item.left, 
+            top: item.top, 
+            width: '4px', 
+            height: '4px', 
+            animationDuration: item.duration, 
+            animationDelay: item.delay, 
+            opacity: item.opacity,
+            backgroundColor: '#ffffff'
+          }}></div>
+        ))}
+      </div>
+    );
+  }
+
+  if (effectId === 'energy_wave' || effectId === 'electric') {
+    return (
+      <div className="fixed inset-0 pointer-events-none z-0 flex items-center justify-center">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="energy-wave-item" style={{ 
+            width: '300px', 
+            height: '300px', 
+            animationDelay: `${i * 1.3}s`,
+            borderColor: effectId === 'electric' ? 'rgba(56, 189, 248, 0.4)' : 'rgba(129, 140, 248, 0.3)'
+          }}></div>
+        ))}
+      </div>
+    );
+  }
+
+  if (category === 'glow') {
+    return (
+      <div className="fixed inset-0 pointer-events-none z-0">
+        {items.slice(0, 10).map(item => (
+          <div key={item.id} className="glow-particle" style={{ 
+            left: item.left, 
+            top: item.top, 
+            width: '150px', 
+            height: '150px', 
+            animationDuration: '10s', 
+            animationDelay: item.delay, 
+            opacity: 0.05,
+            background: 'radial-gradient(circle, rgba(129, 140, 248, 0.8), transparent 70%)'
+          }}></div>
         ))}
       </div>
     );
@@ -72,8 +137,8 @@ const App: React.FC = () => {
   const [resultUrl, setResultUrl] = useState<string | null>(null);
   const [aiPrompt, setAiPrompt] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string>(EFFECT_CATEGORIES[0].id);
 
-  // Added reset function to clear state and return to initial view
   const reset = () => {
     setStatus(AppStatus.IDLE);
     setImage(null);
@@ -93,7 +158,7 @@ const App: React.FC = () => {
       if (!hasKey) await window.aistudio.openSelectKey();
 
       setStatus(AppStatus.ANALYZING);
-      setStatusMessage(`AI đang phác thảo vibe "${selectedEffect.name}" cho video của bạn...`);
+      setStatusMessage(`AI đang phác thảo vibe "${selectedEffect.name}"...`);
 
       const imageData: FileData = {
         base64: await fileToBase64(image),
@@ -117,14 +182,15 @@ const App: React.FC = () => {
       setStatus(AppStatus.SUCCESS);
     } catch (err: any) {
       console.error(err);
-      const errorMessage = err.message || "Đã xảy ra lỗi.";
-      setError(errorMessage);
+      setError(err.message || "Đã xảy ra lỗi.");
       setStatus(AppStatus.ERROR);
-      if (errorMessage.includes("Requested entity was not found")) {
+      if (err.message?.includes("Requested entity was not found")) {
         window.aistudio.openSelectKey();
       }
     }
   };
+
+  const filteredEffects = EFFECTS.filter(e => e.category === activeCategory);
 
   return (
     <div className="relative min-h-screen pb-20 px-4 flex flex-col items-center">
@@ -135,7 +201,7 @@ const App: React.FC = () => {
           <span className="gradient-text">『TW』Vũ•RuBi</span>
         </h1>
         <p className="text-slate-400 text-lg leading-relaxed">
-          Kênh kiến tạo video AI chuyên nghiệp. Chọn Vibe, tải ảnh & nhạc để bắt đầu.
+          Biến ý tưởng thành video AI triệu view. Chọn phong cách của bạn và bắt đầu ngay.
         </p>
       </header>
 
@@ -150,7 +216,7 @@ const App: React.FC = () => {
                 icon="fa-image"
                 selectedFile={image}
                 onFileSelect={setImage}
-                description="Hình ảnh làm gốc cho video"
+                description="Khung hình khởi đầu cho video"
               />
               <FilePicker 
                 label="Nhạc Nền (Soundtrack)" 
@@ -158,37 +224,74 @@ const App: React.FC = () => {
                 icon="fa-music"
                 selectedFile={audio}
                 onFileSelect={setAudio}
-                description="Giai điệu quyết định nhịp điệu video"
+                description="Giai điệu chủ đạo của video"
               />
             </div>
 
-            {/* 2. Effect Selector */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 mb-2">
-                <i className="fas fa-wand-sparkles text-indigo-400"></i>
-                <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400">Chọn Hiệu Ứng (Effect Vibe)</h3>
+            {/* 2. Effect Selector with Categories */}
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <i className="fas fa-wand-sparkles text-indigo-400"></i>
+                  <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400">Kho Hiệu Ứng Trend</h3>
+                </div>
+                <div className="hidden sm:flex bg-slate-900/60 p-1 rounded-xl border border-slate-800">
+                  {EFFECT_CATEGORIES.map(cat => (
+                    <button
+                      key={cat.id}
+                      onClick={() => setActiveCategory(cat.id)}
+                      className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all
+                        ${activeCategory === cat.id ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}
+                      `}
+                    >
+                      {cat.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Mobile Category Dropdown / Simple List */}
+              <div className="sm:hidden flex overflow-x-auto pb-2 gap-2 scrollbar-hide">
+                {EFFECT_CATEGORIES.map(cat => (
+                  <button
+                    key={cat.id}
+                    onClick={() => setActiveCategory(cat.id)}
+                    className={`whitespace-nowrap px-4 py-2 rounded-xl text-[10px] font-bold uppercase border
+                      ${activeCategory === cat.id ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-slate-900 border-slate-800 text-slate-400'}
+                    `}
+                  >
+                    {cat.name}
+                  </button>
+                ))}
               </div>
               
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-                {EFFECTS.map((eff) => (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {filteredEffects.map((eff) => (
                   <button
                     key={eff.id}
                     onClick={() => setSelectedEffect(eff)}
-                    className={`p-3 rounded-2xl flex flex-col items-center gap-2 transition-all border-2 text-center
+                    className={`group relative p-4 rounded-3xl flex flex-col items-center gap-3 transition-all border-2 text-center
                       ${selectedEffect.id === eff.id 
                         ? 'effect-card-selected border-indigo-500 bg-indigo-500/10' 
-                        : 'border-slate-800 hover:border-slate-700 bg-slate-900/40'}
+                        : 'border-slate-800 hover:border-slate-600 bg-slate-900/40'}
                     `}
                   >
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center bg-slate-800
-                      ${selectedEffect.id === eff.id ? 'text-indigo-400' : 'text-slate-400'}
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300
+                      ${selectedEffect.id === eff.id 
+                        ? 'bg-indigo-500 text-white rotate-6' 
+                        : 'bg-slate-800 text-slate-500 group-hover:scale-110 group-hover:bg-slate-700'}
                     `}>
-                      <i className={`fas ${eff.icon} text-lg`}></i>
+                      <i className={`fas ${eff.icon} text-xl`}></i>
                     </div>
                     <div>
-                      <span className="text-xs font-bold block truncate">{eff.name}</span>
-                      <span className="text-[10px] text-slate-500 block">{eff.category}</span>
+                      <span className="text-sm font-bold block truncate">{eff.name}</span>
+                      <span className="text-[10px] text-slate-500 block mt-1 line-clamp-1 opacity-70 group-hover:opacity-100">{eff.description}</span>
                     </div>
+                    {selectedEffect.id === eff.id && (
+                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center border-2 border-slate-900 shadow-lg">
+                        <i className="fas fa-check text-[10px] text-white"></i>
+                      </div>
+                    )}
                   </button>
                 ))}
               </div>
@@ -199,13 +302,13 @@ const App: React.FC = () => {
               <button
                 onClick={handleCreateVideo}
                 disabled={!image || !audio}
-                className={`w-full py-5 rounded-3xl text-xl font-black transition-all transform active:scale-[0.98] flex items-center justify-center gap-4 shadow-2xl
+                className={`w-full py-6 rounded-[2rem] text-xl font-black transition-all transform active:scale-[0.97] flex items-center justify-center gap-4 shadow-2xl
                   ${image && audio 
-                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-indigo-500/25' 
-                    : 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-50'}
+                    ? 'bg-gradient-to-r from-indigo-600 via-purple-600 to-fuchsia-600 hover:from-indigo-500 hover:to-fuchsia-500 text-white shadow-indigo-600/30' 
+                    : 'bg-slate-800 text-slate-600 cursor-not-allowed opacity-40'}
                 `}
               >
-                <i className="fas fa-film"></i>
+                <i className="fas fa-play-circle text-2xl"></i>
                 GENERATE "{selectedEffect.name.toUpperCase()}" VIDEO
               </button>
             </div>
@@ -213,79 +316,87 @@ const App: React.FC = () => {
         )}
 
         {(status === AppStatus.ANALYZING || status === AppStatus.GENERATING) && (
-          <div className="py-24 flex flex-col items-center text-center space-y-8">
+          <div className="py-24 flex flex-col items-center text-center space-y-10">
             <div className="relative">
-              <div className="w-32 h-32 border-[6px] border-indigo-500/10 border-t-indigo-500 rounded-full animate-spin shadow-inner"></div>
+              <div className="w-40 h-40 border-[8px] border-indigo-500/10 border-t-indigo-500 rounded-full animate-spin shadow-[0_0_30px_rgba(79,70,229,0.2)]"></div>
               <div className="absolute inset-0 flex items-center justify-center">
-                <i className={`fas ${selectedEffect.icon} text-indigo-400 text-4xl animate-bounce`}></i>
+                <i className={`fas ${selectedEffect.icon} text-indigo-400 text-5xl animate-pulse`}></i>
               </div>
             </div>
-            <div className="space-y-3">
-              <h3 className="text-2xl font-bold text-white tracking-tight">
-                {status === AppStatus.ANALYZING ? "Đang Tư Duy Kịch Bản..." : "Đang Vẽ Từng Khung Hình..."}
+            <div className="space-y-4">
+              <h3 className="text-3xl font-black text-white tracking-tight">
+                {status === AppStatus.ANALYZING ? "AI Đang Lên Ý Tưởng..." : "Đang Sản Xuất Video..."}
               </h3>
-              <p className="text-slate-400 max-w-md mx-auto italic font-medium">"{statusMessage}"</p>
+              <div className="bg-slate-900/80 px-6 py-3 rounded-2xl border border-slate-800 max-w-md mx-auto">
+                <p className="text-slate-400 text-sm font-medium animate-pulse">"{statusMessage}"</p>
+              </div>
             </div>
           </div>
         )}
 
         {status === AppStatus.SUCCESS && resultUrl && (
           <div className="space-y-8 animate-in slide-in-from-bottom-10 duration-700">
-            <div className="relative group rounded-3xl overflow-hidden aspect-video bg-black shadow-2xl border border-white/5">
+            <div className="relative group rounded-[2rem] overflow-hidden aspect-video bg-black shadow-2xl border border-white/5 ring-1 ring-white/10">
               <video src={resultUrl} controls autoPlay loop className="w-full h-full object-contain" />
-              <div className="absolute top-4 left-4 flex gap-2">
-                <span className="bg-indigo-500 text-white px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest shadow-lg flex items-center gap-2">
+              <div className="absolute top-6 left-6 flex flex-wrap gap-2">
+                <span className="bg-indigo-600/90 backdrop-blur-md text-white px-5 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl flex items-center gap-2 border border-white/10">
                   <i className={`fas ${selectedEffect.icon}`}></i> {selectedEffect.name}
                 </span>
-                <span className="bg-green-500 text-white px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest shadow-lg flex items-center gap-2">
-                  <i className="fas fa-check"></i> 720p HD
+                <span className="bg-emerald-500/90 backdrop-blur-md text-white px-5 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl flex items-center gap-2 border border-white/10">
+                  <i className="fas fa-video"></i> VEO 3.1 FAST
                 </span>
               </div>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <button
                 onClick={() => downloadVideo(resultUrl, `Vu_RuBi_${selectedEffect.id}_${Date.now()}.mp4`)}
-                className="py-4 bg-indigo-600 hover:bg-indigo-500 rounded-2xl font-black text-lg flex items-center justify-center gap-3 transition-all shadow-xl shadow-indigo-600/20"
+                className="py-5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 rounded-[1.5rem] font-black text-lg flex items-center justify-center gap-3 transition-all shadow-2xl shadow-indigo-600/20 active:scale-95"
               >
-                <i className="fas fa-cloud-arrow-down"></i> TẢI VIDEO XUỐNG
+                <i className="fas fa-download text-xl"></i> TẢI XUỐNG NGAY
               </button>
               <button
                 onClick={reset}
-                className="py-4 bg-slate-800 hover:bg-slate-700 rounded-2xl font-black text-lg flex items-center justify-center gap-3 transition-all border border-slate-700"
+                className="py-5 bg-slate-800/80 hover:bg-slate-700 rounded-[1.5rem] font-black text-lg flex items-center justify-center gap-3 transition-all border border-slate-700 active:scale-95"
               >
-                <i className="fas fa-wand-magic"></i> LÀM VIDEO KHÁC
+                <i className="fas fa-plus-circle text-xl"></i> LÀM VIDEO MỚI
               </button>
             </div>
 
-            <div className="p-5 bg-indigo-500/5 rounded-2xl border border-indigo-500/10">
-              <h4 className="text-xs font-black text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-2">
-                <i className="fas fa-quote-left"></i> AI Director Prompt
-              </h4>
-              <p className="text-sm text-slate-400 leading-relaxed italic">"{aiPrompt}"</p>
+            <div className="p-6 bg-slate-900/50 rounded-[1.5rem] border border-slate-800">
+              <div className="flex items-center gap-2 mb-3">
+                <i className="fas fa-quote-left text-indigo-500"></i>
+                <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Kịch Bản AI Gemini</h4>
+              </div>
+              <p className="text-sm text-slate-300 leading-relaxed italic font-medium opacity-80">"{aiPrompt}"</p>
             </div>
           </div>
         )}
 
         {status === AppStatus.ERROR && (
-          <div className="py-16 text-center space-y-6">
-            <div className="w-24 h-24 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center text-4xl mx-auto border border-red-500/20">
-              <i className="fas fa-triangle-exclamation"></i>
+          <div className="py-20 text-center space-y-8">
+            <div className="w-28 h-28 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center text-5xl mx-auto border border-red-500/20 animate-bounce">
+              <i className="fas fa-exclamation-circle"></i>
             </div>
-            <h3 className="text-2xl font-bold text-white">Lỗi Hệ Thống</h3>
-            <p className="text-red-400 max-w-md mx-auto font-medium">{error}</p>
-            <button onClick={reset} className="py-3 px-10 bg-slate-800 hover:bg-slate-700 rounded-xl font-bold transition-all">Quay Lại Thử Lại</button>
+            <div className="space-y-2">
+              <h3 className="text-3xl font-black text-white">Úi! Có Lỗi Rồi</h3>
+              <p className="text-red-400 max-w-md mx-auto font-medium opacity-80">{error}</p>
+            </div>
+            <button onClick={reset} className="py-4 px-12 bg-slate-800 hover:bg-slate-700 rounded-2xl font-black transition-all transform active:scale-95">Quay Lại Thử Lại</button>
           </div>
         )}
       </main>
 
-      <footer className="relative z-10 text-slate-500 text-[11px] font-bold uppercase tracking-[0.2em] flex flex-col items-center gap-6">
-        <div className="flex flex-wrap justify-center items-center gap-8 bg-slate-900/40 px-8 py-3 rounded-full border border-slate-800">
-          <div className="flex items-center gap-2"><i className="fas fa-brain text-indigo-400"></i> Gemini 3 Pro</div>
-          <div className="flex items-center gap-2"><i className="fas fa-film text-indigo-400"></i> Veo 3.1 Fast</div>
-          <div className="flex items-center gap-2"><i className="fas fa-palette text-indigo-400"></i> Custom Vibes</div>
+      <footer className="relative z-10 text-slate-500 text-[10px] font-bold uppercase tracking-[0.25em] flex flex-col items-center gap-8">
+        <div className="flex flex-wrap justify-center items-center gap-8 bg-slate-900/60 backdrop-blur-md px-10 py-4 rounded-[2rem] border border-white/5 shadow-2xl">
+          <div className="flex items-center gap-2.5"><i className="fas fa-microchip text-indigo-400"></i> Gemini 3 Pro</div>
+          <div className="flex items-center gap-2.5"><i className="fas fa-wand-magic-sparkles text-purple-400"></i> Veo Engine</div>
+          <div className="flex items-center gap-2.5"><i className="fas fa-shield-halved text-emerald-400"></i> Professional API</div>
         </div>
-        <p className="opacity-40">Designed for Viral Content - © 2024 『TW』Vũ•RuBi</p>
+        <div className="text-center opacity-40">
+          <p>TikTok Trend Video Generator Engine</p>
+          <p className="mt-1">© 2024 『TW』Vũ•RuBi - Proudly Built with AI</p>
+        </div>
       </footer>
     </div>
   );
