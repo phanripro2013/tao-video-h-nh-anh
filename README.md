@@ -1,20 +1,139 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Codemagic Sample Projects
 
-# Run and deploy your AI Studio app
+![codemagic-banner](assets/media/logo_banner.svg)
 
-This contains everything you need to run your app locally.
+## Flutter
+* [Flutter Android and iOS](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/flutter/flutter-android-and-ios-yaml-demo-project)
+* [Flutter macOS sample](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/flutter/flutter-macos-demo-project)
+* [Flutter Windows sample](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/flutter/flutter-windows-demo-project)
 
-View your app in AI Studio: https://ai.studio/apps/drive/1WMIFd7cxxtjpEWfLK6r29cya-A7Xg9sH
-
-## Run Locally
-
-**Prerequisites:**  Node.js
+## Android native
+* [Android sample project](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/android/android-native-quick-start)
 
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## iOS native
+* [iOS sample project](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/ios/ios-native-quick-start)
+
+## React Native
+* [React Native Android and iOS](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/react-native/react-native-demo-project)
+* [React Native using Expo without ejecting](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/react-native/expo-react-native-not-ejected)
+
+## Unity
+* [Unity Android, iOS, Windows, and macOS sample](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/unity/unity-demo-project)
+* [Steam Publishing sample](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/unity/unity-deploy-steam)
+
+
+## Other platforms
+<details><summary> Click to expand... </summary>
+
+
+
+## Ionic Samples
+* [Ionic + Capacitor sample](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/ionic/ionic-capacitor-demo-project)
+* [Ionic + Cordova sample](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/ionic/ionic-cordova-demo-project)
+
+## Kotlin Multiplatform Mobile Samples
+* [KMM sample](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/kotlin-multiplatform-mobile)
+
+
+## .NET MAUI Samples
+* [.NET MAUI Android and iOS](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/dotnet-maui/dotnet-maui-android-ios/)
+</details>
+
+
+-----
+
+## Integrations
+
+### Crash reporting
+* [Firebase Crashlytics](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/integrations/firebase_crashlytics_demo_project)
+* [Sentry](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/integrations/sentry_integration_demo_project)
+
+
+### Code quality
+
+* [Codecov](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/integrations/codecov_integration_demo_project)
+* [SonarQube / SonarCloud (iOS)](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/integrations/sonarqube_integration_demo_project/Sonar)
+* [SonarQube / SonarCloud (Android)](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/integrations/sonarqube_integration_demo_project/Android)
+* [Emerge Tools](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/integrations/emerge-tools-integration-demo-project)
+
+
+### Messaging
+
+* [Discord](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/integrations/discord_integration_demo_project)
+
+### Project management
+
+* [Jira](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/integrations/jira_integration_demo_project)
+
+### Testing
+
+* [emulator.wtf](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/integrations/emulatorwtf-android-demo-project)
+* [Katalon](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/integrations/katalon_integration_demo_project)
+
+### Real-device testing
+
+* [Appetize](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/integrations/appetize_integration_demo_project)
+* [BrowserStack (App Live)](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/integrations/browserstack_app_live_demo_project)
+* [BrowserStack (App Automate)](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/integrations/browserstack_app_automate_demo_project)
+* [Kobiton](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/integrations/kobiton_integration_demo_project)
+* [LambdaTest](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/integrations/lambdatest_integration_demo_project)
+* [pCloudy](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/integrations/pcloudy_integration_demo_project)
+* [Sofy](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/integrations/sofy_integration_demo_project)
+
+
+### Other
+
+* [Capgo](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/integrations/capgo_integration_demo_project)
+
+
+## Older sample projects
+### Flutter Samples
+
+* [Flutter integration tests](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/flutter/flutter-integration-tests-demo-project)
+* [Flutter flavors sample](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/flutter/flutter-flavors-demo-project)
+
+
+
+### iOS (Native) Samples
+* [iOS Automatic code signing sample](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/ios/ios-automatic-code-signing-demo-project)
+* [iOS Manual code signing sample](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/ios/ios-manual-code-signing-demo-project)
+* [iOS White label single scheme sample](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/ios/ios-white-label-single-scheme-demo-project)
+* [iOS Magic Actions sample](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/ios/ios-magic-actions-demo-project)
+
+### Android (Native) Samples
+* [Android with espresso testing sample](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/android/android-espresso-demo-project)
+
+### React Native Samples
+* [React Native detox sample](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/react-native/react-native-detox-demo-project) 
+
+
+
+### Integrations 
+
+* [Fastlane integration sample](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/integrations/fastlane-integration-demo-project)
+
+### YAML Samples
+* [YAML anchors and aliases sample](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/yaml/yaml_anchors_aliases_sample)
+
+### Cordova Samples
+* [Cordova sample](https://github.com/codemagic-ci-cd/codemagic-sample-projects/tree/main/cordova/cordova-demo-project)
+
+## Getting help and support
+
+If you have a technical question or need help with some particular issue, you can get help on our [GitHub discussions](https://github.com/codemagic-ci-cd/codemagic-docs/discussions) page.
+
+Customers who have enabled billing can use the in-app chat widget to get support. You must be logged in to see the chat icon at the bottom right corner (please note that some adblockers might block the chat widget).
+
+## Raising issues
+
+If there are any use cases that are not covered in the sample projects you can create an issue to request them:
+
+[https://github.com/codemagic-ci-cd/codemagic-sample-projects/issues](https://github.com/codemagic-ci-cd/codemagic-sample-projects/issues)
+
+
+
+
+
+
+
